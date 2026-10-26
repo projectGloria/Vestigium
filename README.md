@@ -1,141 +1,334 @@
+<div align="center">
+
+<img src="build/icon.png" alt="Vestigium Logo" width="128" height="128" />
+
 # Vestigium
 
-A desktop app intended to learn a browsing/download workflow from one demonstration. **Milestones 0–9 are implemented (all of the plan):** the adversarial demo site; the Electron/React shell with persistent browser tabs, typed IPC, SQLite storage and settings; recording a demonstration into readable workflow JSON; replaying it; and editing it in the UI. Since milestone 3, replay waits for pages and elements to settle, clicks with real OS-level input in the main frame, dismisses cookie banners that cover a target, and heals steps whose element changed, flagging them for your review. Since milestone 4, a workflow can repeat on every page of a list: open the list's first page and press **↻ Repeat on every page**. Vestigium finds the Next link or button, numbered pages, a "Load more" button or infinite scrolling, and stops at the end. Since milestone 5, teaching ONE item is enough: open a list, press **● Teach**, open one item and click its download link, then stop. Vestigium recognizes the item as one of the list's items, turns the recording into "for every page → for every item → download", and shows a plain-language summary. **◎ Show items on the page** highlights every item it found; untick any to leave them out. A run opens each item in its own tab, skips items it already did, and reports failed items without stopping. Since milestone 6, files are really downloaded: a persistent queue fetches each file through the browser's session (so logins apply), resumes partial files with HTTP Range after a pause, a network drop or even a crash, retries with backoff, checks every file (size, ZIP test, not an error page) and skips items and files it already has. Files land in `Downloads\Vestigium\<site>\`; the **Queue** tab shows progress, speed and time left, with pause, resume, cancel and retry per file or for all. Since milestone 7, each item page's details (title, tags, date, author, and the password under labels like Password, Pass, Unzip password or Şifre) are saved with the file in `<name>_info.txt`; **Download options** sets the file names from a template such as `{site}/{tag}/{title}.{ext}` and can unpack archives with the captured password (ZIP built in, including AES; 7z/RAR when 7-Zip is installed). Since milestone 8, a run that hits a countdown, a captcha or a login **pauses for you** ("Needs you"), brings the window forward with the element highlighted, and **continues by itself** once you are done (Vestigium never clicks a captcha). Teaching one item on a list also saves a **site profile**: next time, open any list of that site and press **▶ Start**. A failed step comes with a screenshot and **↻ Re-teach this step**, which records only that step again. Runs are kept in the History tab across restarts; clicks that read like buying, paying or deleting wait for your OK; an optional allowlist limits which sites a run may use; a tray icon can keep Vestigium working while minimized.
+**Learn once. Automate everywhere.**
 
-## Install
+*An intelligent desktop workflow browser that masters browsing and batch-downloading tasks from a single human demonstration.*
 
-`npm run dist` builds `release/Vestigium Setup 0.1.0.exe`, a per-user Windows installer. It is not code-signed, so Windows SmartScreen asks for confirmation the first time ("More info" → "Run anyway"). `npm run test:package` checks the app inside that installer after a build.
+<p>
+  <img src="https://img.shields.io/badge/Platform-Windows%20x64-0078D4.svg?style=flat-square&logo=windows" alt="Platform: Windows x64" />
+  <img src="https://img.shields.io/badge/Electron-45-47848F.svg?style=flat-square&logo=electron" alt="Electron 45" />
+  <img src="https://img.shields.io/badge/React-19-61DAFB.svg?style=flat-square&logo=react" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript-7-3178C6.svg?style=flat-square&logo=typescript" alt="TypeScript 7" />
+  <img src="https://img.shields.io/badge/Database-SQLite%20WAL-003B57.svg?style=flat-square&logo=sqlite" alt="SQLite WAL" />
+  <img src="https://img.shields.io/badge/AdBlock-Built--in-E22D2D.svg?style=flat-square" alt="Built-in AdBlock" />
+</p>
 
-## Command line
+---
 
-The same engine without the window, using the app's saved site profiles, settings and logins (close the window first: one process per profile):
+<p>
+  <a href="#-about-vestigium">About</a> •
+  <a href="#-key-features">Key Features</a> •
+  <a href="#-visual-tour">Visual Tour</a> •
+  <a href="#-installation--desktop-app">Installation</a> •
+  <a href="#-command-line-cli">Command Line</a> •
+  <a href="#-building-from-source">Building</a> •
+  <a href="#-demo-suite--scenarios">Scenarios</a> •
+  <a href="#-architecture--storage">Architecture</a> •
+  <a href="#-icon--design-philosophy">Design</a> •
+  <a href="#-license--credits">License</a>
+</p>
+
+<img
+  width="920"
+  src="artifacts/milestone-2-dev-recorded.png"
+  alt="Vestigium Workflow Browser Interface Preview"
+/>
+
+</div>
+
+---
+
+## 👣 About Vestigium
+
+**Vestigium** (*Latin: "footprint", "trace", or "track"*) is an intelligent desktop workflow browser engineered to eliminate the brittle, time-consuming nature of web scrapers and download automation.
+
+Traditionally, web automation requires manually crafting fragile CSS selectors or XPath queries that break whenever target sites change layouts, obfuscate class names, or introduce dynamic JavaScript frameworks. 
+
+With **Vestigium**, you don't write scripts. You simply browse:
+1. **Teach by Doing**: Press **● Teach**, perform your actions on a single item, and click **■ Stop recording**.
+2. **Instant Generalization**: Vestigium infers the list pattern, recognizes individual collection items, and compiles your demonstration into a generalized pipeline: *"for every page → for every item → download"*.
+3. **Resilient Replay**: Powered by a 6-tier locator ranking engine, OS-level trusted input, and automated self-healing, Vestigium executes your routine across hundreds of items with minimal supervision.
+4. **Human-in-the-Loop ("Needs You")**: When encountering captchas, server countdowns, or logins, Vestigium politely pauses, brings itself forward, and waits for your touch — then automatically resumes its run.
+
+---
+
+## ✨ Key Features
+
+<table>
+  <tr>
+    <td width="50%">
+      <h3>🎓 One-Shot Learning &amp; Generalization</h3>
+      <p>Demonstrate an action on just <i>one</i> item in a list. Vestigium recognizes the list pattern, highlights candidate items with exclusion checkboxes, and loops seamlessly across multiple pages.</p>
+    </td>
+    <td width="50%">
+      <h3>🛡️ Self-Healing Locator Engine</h3>
+      <p>Locators are ranked across six fallback tiers (test IDs, accessible roles, text, CSS, XPath, and structural JSON fingerprints). Healed elements are flagged with one-click review controls.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>🔄 Smart Pagination Detection</h3>
+      <p>Automatically discovers pagination controls across varied layouts: classic <code>Next</code> buttons, numbered page bars, "Load More" triggers, or continuous infinite scrolling.</p>
+    </td>
+    <td width="50%">
+      <h3>👤 "Needs You" Human-in-the-Loop</h3>
+      <p>Vestigium never tries to bypass captchas or crack bot guards. Instead, it pauses, highlights the challenge for human completion, and immediately continues on its own once satisfied.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>📥 Persistent Resumable Queue</h3>
+      <p>File downloads route through authenticated browser sessions with HTTP Range chunk resume across pauses, drops, or restarts. Features hash integrity checks and automatic duplicate detection.</p>
+    </td>
+    <td width="50%">
+      <h3>🏷️ Metadata &amp; Archive Extraction</h3>
+      <p>Captures page metadata (titles, tags, author, date, and archive passwords) into <code>_info.txt</code> sidecars. Automatically unpacks ZipCrypto/AES ZIP archives and 7z/RAR files via 7-Zip.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>🚫 Network-Level Ad &amp; Tracker Blocking</h3>
+      <p>Ships with built-in EasyList, EasyPrivacy, and uBlock Origin filter list enforcement at the network layer. Blocks popunders, ads, and telemetry without injecting foreign scripts into pages.</p>
+    </td>
+    <td width="50%">
+      <h3>⚡ Headless Command-Line Runner</h3>
+      <p>Execute saved site profiles directly from Windows Terminal, PowerShell, or automated scripts using the <code>vestigium run</code> CLI shim without graphical overhead.</p>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 📸 Visual Tour
+
+### 1. Interactive Demonstration &amp; Workflow Recording
+Perform your regular browsing tasks in the integrated tabbed browser. Vestigium compiles interactions into clean, readable, editable workflow steps with configurable parameters.
+
+<p align="center">
+  <img src="artifacts/milestone-2-dev-recorded.png" alt="Demonstration Recording in Vestigium" width="860" />
+</p>
+
+### 2. Self-Healing Locator Review &amp; Inspection
+When a website mutates its DOM or renames classes, Vestigium's structural fingerprinting resolves the intended element, applies a self-heal, and gives you transparent review options (`Keep new locators` / `Undo heal`).
+
+<p align="center">
+  <img src="artifacts/milestone-3-heal-review.png" alt="Self-Healing Review Interface" width="860" />
+</p>
+
+### 3. Native Ad &amp; Tracker Suppression
+Enjoy high-speed, distraction-free navigation. Invasive banners, third-party trackers, and rogue popunders are rejected at the network protocol layer without tampering with document scripts.
+
+<p align="center">
+  <img src="artifacts/adblock/misskon-blocking-on.png" alt="Ad-blocking verification in Vestigium" width="860" />
+</p>
+
+### 4. Dual Light &amp; Dark Theme Support
+Seamlessly switch between dark and light themes. Application chrome, layout proportions, and workflow sidebars automatically adapt with persistent preference storage.
+
+<p align="center">
+  <img src="artifacts/milestone-2-dev-replayed-light.png" alt="Light Mode Replay" width="860" />
+</p>
+
+---
+
+## 🚀 Installation &amp; Desktop App
+
+### Windows Installer
+
+Generate or run the Windows per-user installer:
 
 ```powershell
-vestigium run --profile example.com --url "https://example.com/list" --output D:\Downloads\example --max-pages 5 --force
+npm run dist
+# Output package: release/Vestigium Setup 0.1.0.exe
+```
+
+Upon installation, Vestigium provisions:
+- **Start Menu & Desktop Shortcuts** with the high-resolution Vestigium green mark icon.
+- **Isolated User Profile**: Stored in `%APPDATA%\Vestigium` (database, settings, rotating logs, filter lists, and session cookies).
+- **Global Command-Line Tool**: Adds `vestigium.cmd` to your installation directory for terminal runs.
+
+> [!NOTE]
+> Because release builds are self-packaged and not code-signed with a commercial certificate, Windows SmartScreen may present a prompt on first launch. Click **More info** → **Run anyway** to proceed.
+
+---
+
+## ⚡ Command-Line (CLI)
+
+Vestigium includes a headless execution engine powered by the same underlying scheduler, SQLite database, and authenticated browser profile.
+
+> [!IMPORTANT]
+> Ensure the desktop application window is closed before initiating a CLI run, as SQLite and Chromium profiles enforce single-instance locking.
+
+```powershell
+# Run a batch workflow from a saved profile
+vestigium run --profile example.com --url "https://example.com/gallery" --output D:\Downloads\example --max-pages 5 --force
+
+# List all available site profiles
 vestigium profiles
+
+# Show command help and options
 vestigium --help
 ```
 
-`vestigium` is the `vestigium.cmd` next to `Vestigium.exe` in the install folder. In development, use `npm run cli -- run --profile …`. The run prints its progress, waits for its downloads, and exits with 0 (done), 1 (something failed), 2 (wrong arguments) or 3 (could not start). If a page needs you (captcha, login, countdown), the window opens and the run waits. Call `Vestigium.exe` directly only with `--` before the command: Electron refuses to start when anything follows a URL argument otherwise.
+### CLI Parameters
 
-## Run the desktop app
-
-The toolchain is pinned: Node **26.8.1** (`.nvmrc`), npm **11.19.0**, Electron **45.0.0**, electron-vite **6.0.0**, Vite **8.3.5**, React **19.3.1**, better-sqlite3 **13.0.3**. Direct dependencies and the lockfile use exact versions.
-
-```powershell
-npm ci
-npx playwright install chromium
-npm run dev
-```
-
-For the production build:
-
-```powershell
-npm run build
-npm start
-```
-
-Enter an HTTP/HTTPS address and press Go. Back, Forward and Reload control the active browser tab. Popups become managed tabs; each tab has a close button. The Light/Dark button persists your theme. Press **● Teach**, do the task once in the current tab, then press **■ Stop recording**. The steps appear in the Workflow panel in plain language. From there you can rename the workflow, relabel, disable, reorder or delete steps, inspect each step's ranked locators, and export or import the workflow as JSON. **▶ Run** replays the selected workflow in the current tab. The mode menu next to it offers **Step by step** (pause before each step: ⏭ Next step / ▶ Resume) and **Dry run** (highlight targets without clicking). **❚❚ Pause** and **■ Stop run** work during a run. A step that had to be healed shows "⚠ Healed during a run" with **Keep new locators** and **Undo heal**. Results appear on each step and in the History tab, including which locator matched. Password and payment fields are never recorded. Downloads you start yourself, and every download of a run, go to the **Queue** tab: **Pause all / Resume all**, **Cancel all**, **Retry failed**, **Force** (download items again even if already downloaded), how many downloads run at once, **Open folder** and **Change folder…**. A file identical to one already saved is not stored twice. While teaching, the download is recorded but not saved. Site profiles are still a placeholder for milestone 8.
-
-**Ad blocking.** Browser tabs block ads, trackers and ad popups with the EasyList, EasyPrivacy and uBlock Origin filter lists (network requests only; nothing is injected into pages). It is on by default; Settings → **Safety, ads and tray** turns it off and shows how many filters are loaded and how many requests were blocked. The lists ship with the app and refresh weekly into the profile (`adblock/`). Your own downloads are never blocked. Ad networks that rotate to brand-new domains can still open a popunder until the lists catch up. `npm run filter-lists` refreshes the copy bundled with the app.
-
-### Persistent data and native SQLite
-
-The main process creates `vestigium.sqlite` in Electron's OS user-data directory (Windows: `%APPDATA%/Vestigium`; macOS: `~/Library/Application Support/Vestigium`; Linux: `$XDG_CONFIG_HOME/Vestigium`, usually `~/.config/Vestigium`). Browser data uses the `persist:vestigium` partition inside that directory. Logs rotate under `logs/` at 1 MiB with three backups; the UI shows the latest 200 entries.
-
-Chromium persists the browser profile. On clean shutdown, session-only cookies are additionally saved to `session-cookies.enc` using Electron safeStorage OS encryption and restored before browsing on the next launch. Persistent-cookie expiration is not extended. The session snapshot is consumed after restoration so an old snapshot cannot resurrect a logged-out session following a crash. Without an OS encryption backend (including Linux `basic_text`), the app logs a warning and does not save session-only cookies. This milestone guarantees a clean close/relaunch, not crash recovery of session cookies. A website can still expire/revoke its server-side session.
-
-`npm ci` runs `postinstall`, which calls `electron-rebuild -f -w better-sqlite3` for the **pinned Electron ABI**, not the host Node ABI. If Electron or dependencies change, run `npm run native:rebuild`. If no matching prebuilt native binary is available, Windows requires Python and Visual Studio Build Tools with the C++ workload. Do not run `npm rebuild better-sqlite3` for host Node: it can replace the Electron-compatible binary. Unit tests run under Electron's Node mode so they use the same native ABI as the application.
-
-`VESTIGIUM_USER_DATA` can select a separate absolute profile directory for development/testing. Tests create isolated temporary profiles and keep the demo server alive across app restarts. `VESTIGIUM_DOWNLOADS` sets the default download folder (tests point it into their temporary profile). `VESTIGIUM_7ZIP` points to 7-Zip's `7z.exe` if it is not in Program Files. `VESTIGIUM_FILTER_LISTS` replaces the bundled filter lists with another folder (a `manifest.json` with `fetchedAt` plus `*.txt` lists) and disables refreshing; `VESTIGIUM_FILTER_REFRESH=off` only disables refreshing (tests set it). `VESTIGIUM_TEST=1` suppresses only blocking startup error dialogs and desktop notifications; errors still go to stderr and the application log, and startup failure exits nonzero.
-
-## Run the demo
-
-From another terminal, using the pinned toolchain:
-
-```powershell
-npm ci
-npx playwright install chromium
-npm run demo
-```
-
-Open <http://127.0.0.1:4173>. The second local origin is <http://127.0.0.1:4174>. Both bind only to `127.0.0.1`. Press Ctrl+C to stop both servers. Dependencies/browser installation needs internet; running the demo does not.
-
-The index links every scenario. Dismiss the cookie overlay to interact. Each origin stores its own dismissal preference. No external assets, telemetry or production credentials are used.
-
-## Scenarios
-
-| Scenario | Route / behavior |
+| Flag | Description |
 | --- | --- |
-| Paginated cards / table | `/list`, `/list?layout=table`: 47 distinct items, 10 per page, five pages, disabled Next at the end |
-| Infinite scroll / Load more | `/list?mode=infinite`, `/list?mode=more`; combine either with `layout=table` |
-| SPA pagination / wrapping | `/list?mode=spa`: a Next button swaps items in place without changing the URL; `/list?wrap=1`: the last page's Next link points back to page 1 |
-| Single / empty | `/list?dataset=single` (7 items), `/list?dataset=empty` (0 items) |
-| Broken item link | `/list?broken=3`: item 3's link points to a page that does not exist (per-item failure) |
-| Captcha | `/item/N?variant=captcha`: the download goes through a host page with a stand-in captcha that only a person's click clears |
-| Short link | `/item/N?variant=shortlink`: the download opens a link-shortener popup (like ouo.io) whose first "Get Link" button is the captcha (`.g-recaptcha`); the next page counts down 3 s, then its own "Get Link" (same id and name) downloads |
-| Risky button | `/confirm`: a "Delete this note" button (nothing is deleted) |
-| Ads | `/ads`: a banner script from the second origin (`/demo-ads/banner.js`) inserts an ad and opens a popunder on the first click; "Visit our sponsor" opens an ad page from an inline script. `tests/demo-site/filter-lists` blocks `/demo-ads/` |
-| Dead download in a list | `/list?dead=3`: item 3's page exists, but its download link is dead (404) |
-| Protected archives | `/files/encrypted` (ZipCrypto ZIP), `/files/aes` (AES-256 ZIP), `/files/sevenzip` (encrypted 7z), all made with 7-Zip, password `vestigium-demo`; `/list?variant=aes` makes every item serve one |
-| Metadata layouts | `/item/N?meta=table` or `?meta=inline` shows the item's details as a table or as "Label: value" lines instead of a definition list |
-| Duplicates | `/list?dataset=duplicates`: 49 occurrences, 47 unique IDs; IDs 9 and 10 repeated on page 2 |
-| Changing list | `/list?dataset=changing`: after the first request, remove 11, move 20 to the front, append new item 48 |
-| Item / ZIP | `/item/1`; the real ZIP contains `readme.txt` |
-| External host / popup | `/item/1?variant=countdown`, `/item/1?variant=popup` |
-| Dead / HTML error | `variant=dead` gives 404; `variant=html` gives 200 with `text/html` and an error document |
-| Expiring link | `variant=expiring`; reload the item page for a fresh token after 410 |
-| Generated file | `variant=large`: 64 MiB by default; append `&throttle=65536` for 64 KiB/s or `&range=off` to ignore Range |
-| Filename sources | `variant=disposition`, `variant=url`, `variant=none` |
-| Filename edge cases | `variant=unicode`, `variant=long`, `variant=invalid`; candidate names are intentionally unsanitized headers |
-| DOM changes | `mutate=classes`, `move`, `wrap`, `reorder`, or `all` on an item URL; `mutate=label` renames the button to "Download ZIP file" (not part of `all`) |
-| Login | `/list?login=1`; fictional credentials **demo / vestigium** |
-| Recorder lab | `/lab`: search box submitted with Enter, `<select>`, password field, open-shadow-root widget, same-origin and cross-origin iframes (`/lab/frame`), `pushState` routes (`/lab/spa/one`, `/lab/spa/two`), nested scroll area, and a "Trusted action" button that reports whether a click was trusted input |
+| `--profile <domain>` | The saved site profile identifier to execute |
+| `--url <address>` | Initial starting list URL |
+| `--output <folder>` | Target directory for completed downloads |
+| `--max-pages <num>` | Maximum pagination depth before stopping |
+| `--force` | Re-download items even if already present in history |
+| `--dry-run` | Inspect and highlight targets without invoking downloads |
 
-Lists include similar popular-post cards outside the main collection, header/footer links and the overlay. The changing scenario is stateful per server instance: restart the server to reset it. Its sequential five-page crawl returns 47 occurrences, including ID 10 twice and item 48 at the end; it misses removed 11 and relocated 20. Expected sequences are exported by `tests/demo-site/fixtures.ts` so future crawler tests can distinguish duplicates and unavoidable offset-pagination omissions.
+**Exit Codes:**
+- `0` — Workflow completed successfully.
+- `1` — Encountered an unrecoverable step or network error.
+- `2` — Invalid arguments supplied.
+- `3` — Could not initialize process or load profile.
 
-Items 1–5 respectively use `Password:`, `Pass:`, `Unzip password:`, `Şifre:`, and no password. Labels repeat across the dataset. The metadata password is `vestigium-demo`; the small ZIP is intentionally unencrypted. Encryption/extraction behavior belongs to milestone 7. Items include author, tag and date metadata.
+---
 
-The countdown is enforced on the server for five seconds, then requires a manual Continue click. Direct access before readiness gives 425; a missing ticket gives 403. The popup automatically initiates a real browser download in the new tab. Tabs remain open for inspection.
+## 🛠️ Building from Source
 
-Login sessions allow five protected requests by default. Protected document and download requests consume the limit; health, assets and login do not. Explicit `login=1` is propagated by list/item/host links. Global login mode protects routes without a query flag. Expiry redirects to login with a local return destination. Sessions are in memory; restarting the demo intentionally resets them. Persistent application sessions are milestone 1.
+### Prerequisites
 
-## Configuration
+Ensure your environment includes:
+- **Node.js**: `26.8.1` (pinned via `.nvmrc`)
+- **npm**: `11.19.0`
+- **Visual Studio C++ Build Tools** & **Python** (required for `better-sqlite3` native ABI compilation)
 
-Set environment variables before `npm run demo`, for example:
+### Development Setup
 
+1. **Clone the repository:**
+   ```powershell
+   git clone https://github.com/projectGloria/Vestigium.git
+   cd Vestigium
+   ```
+
+2. **Install dependencies and native modules:**
+   ```powershell
+   npm ci
+   npx playwright install chromium
+   ```
+   > [!TIP]
+   > The `npm ci` script triggers a `postinstall` hook that executes `electron-rebuild -f -w better-sqlite3`. Never execute `npm rebuild better-sqlite3` directly with host Node, as this overwrites the Electron ABI binary with a Node ABI binary. Use `npm run native:rebuild` if rebuilding is needed.
+
+3. **Start the development environment:**
+   ```powershell
+   npm run dev
+   ```
+
+4. **Production Build & Preview:**
+   ```powershell
+   npm run build
+   npm start
+   ```
+
+---
+
+## 🧪 Demo Suite &amp; Scenarios
+
+Vestigium includes an adversarial dual-origin test server (`tests/demo-site`) providing reproducible scenarios for pagination edge cases, anti-bot countdowns, captchas, and dynamic DOM mutations.
+
+Start the test server:
 ```powershell
-$env:DEMO_THROTTLE_BPS = '262144'
-$env:DEMO_SESSION_REQUESTS = '3'
 npm run demo
 ```
+- **Primary Origin**: `http://127.0.0.1:4173`
+- **Secondary File Host**: `http://127.0.0.1:4174`
 
-| Variable | Default | Meaning |
+### Test Scenario Matrix
+
+| Scenario | Route / Query | Verified Behavior |
 | --- | --- | --- |
-| `DEMO_PORT` / `DEMO_HOST_PORT` | `4173` / `4174` | Main and file-host TCP ports |
-| `DEMO_SEED` | `1` | Reproducible class-mutation sequence |
-| `DEMO_LARGE_BYTES` | `67108864` | Generated file size |
-| `DEMO_THROTTLE_BPS` | `0` | Bytes/second; zero is unthrottled; URL `throttle` overrides it |
-| `DEMO_RANGE` | on | Set `off` to disable Range globally; URL `range=off` also disables it |
-| `DEMO_TOKEN_TTL_MS` | `5000` | Expiring-link lifetime |
-| `DEMO_SESSION_REQUESTS` | `5` | Successful authenticated request budget |
-| `DEMO_LOGIN` | off | Set `1` to require login globally |
+| **Paginated Cards & Tables** | `/list`, `/list?layout=table` | 47 items over 5 pages; detects end of pagination |
+| **Infinite Scroll & Load More** | `/list?mode=infinite`, `/list?mode=more` | Dynamic DOM insertion and continuous scrolling |
+| **SPA Route Pagination** | `/list?mode=spa`, `/list?wrap=1` | In-place view replacement and loop-wrap prevention |
+| **Human Captcha Gate** | `/item/N?variant=captcha` | Enters "Needs you" state; pauses for human click |
+| **Countdown & Ticket Gate** | `/item/1?variant=countdown` | Enforces 5s server wait; prompts manual continuation |
+| **Shortlink Popups** | `/item/N?variant=shortlink` | Traverses intermediary shortlink redirects safely |
+| **DOM Class & Tag Mutation** | `/item/N?mutate=all` | Validates self-healing multi-locator resolution |
+| **Encrypted Archives** | `/files/encrypted`, `/files/aes` | Unpacks ZipCrypto, AES-256 ZIP, and encrypted 7z |
+| **Metadata Password Labels** | `/item/1` through `/item/5` | Extracts `Password:`, `Pass:`, `Unzip:`, and `Şifre:` |
+| **Network Ad Suppression** | `/ads` | Neutralizes external banner scripts and popunders |
+| **Broken & Dead Downloads** | `/list?broken=3`, `/list?dead=3` | Skips failed items cleanly without aborting run |
+| **Dynamic Item Set** | `/list?dataset=changing` | Detects removals, reordering, and newly appended items |
 
-HTTP Range supports bounded, suffix and open-ended single ranges, If-Range ETags and 416 with total size. Range-disabled responses return the full body with 200. Generated byte at offset `n` equals `n % 251`, enabling independent integrity checks. Streaming honors backpressure and stops on client disconnect. The fixture supports resumable responses; it does not implement the future download manager.
-
-## Verification
+### Test Commands
 
 ```powershell
+# Type verification
 npm run typecheck
+
+# Full test pipeline (unit, demo suite, and Electron e2e)
 npm test
-npm run test:unit
-npm run test:demo
-npm run test:http
-npm run test:e2e
+
+# Granular suites
+npm run test:unit      # Core engine, migrations, and download queue unit tests
+npm run test:demo      # Playwright browser integration suite
+npm run test:http      # HTTP Range and network streaming tests
+npm run test:e2e       # Electron application e2e tests
+npm run test:package   # Post-dist NSIS installer verification
 ```
 
-`npm test` runs application unit tests, every milestone 0 test, then a production build and Playwright Electron tests. `test:e2e` tests the Electron app; `test:demo` retains the entire original browser/HTTP demo suite. No manually running server is required. Electron tests verify login after full process restart, fresh-profile isolation, managed popups, browser sandbox/bridge separation, rejected IPC, permissions, settings and native-pane resizing. `test:unit` bundles every `tests/app-unit/*.test.ts` file (no manual list). Unit tests cover migrations, repository CRUD, validation and log rotation. Demo tests retain all original download and list scenarios. Screenshots, traces and per-test server logs go to ignored `test-results/`.
+---
 
-Manual servers write JSON-lines logs under `.demo-logs/<instance>/demo.log`, rotating at 1 MiB with three backups. Logs contain levels, HTTP status and readable errors; query tokens, passwords and cookie values are not logged.
+## 🏗️ Architecture &amp; Storage
 
-See [architecture](docs/ARCHITECTURE.md) for process boundaries, IPC, schema and security decisions. Each milestone's evidence is in `docs/MILESTONE-N-VERIFICATION.md`.
+```
+┌────────────────────────────────────────────────────────┐
+│                   Electron Main                        │
+│  ┌───────────────────────┐   ┌──────────────────────┐  │
+│  │   WebContentsView     │   │   SQLite Database    │  │
+│  │   Tab Manager         │   │   (WAL / Synchronous)│  │
+│  └───────────┬───────────┘   └──────────┬───────────┘  │
+│              │                          │              │
+│              ▼                          ▼              │
+│  ┌───────────────────────┐   ┌──────────────────────┐  │
+│  │   Network Monitor     │   │   Download Manager   │  │
+│  │   (AdBlock Filters)   │   │   (HTTP Range Queue) │  │
+│  └───────────────────────┘   └──────────────────────┘  │
+└──────────────────────────┬─────────────────────────────┘
+                           │ Typed IPC (Zod Schema)
+┌──────────────────────────▼─────────────────────────────┐
+│                 React Shell Chrome                     │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │   Tabs • Address Bar • Workflow Panel • Queue    │  │
+│  └──────────────────────────────────────────────────┘  │
+└────────────────────────────────────────────────────────┘
+```
+
+- **Strict Sandbox Boundary**: React chrome contains no Node.js or Electron access. Communication flows entirely through typed IPC schemas (`src/shared/ipc.ts`) validated at runtime by Zod.
+- **Embedded SQLite (WAL Mode)**: High-speed relational storage at `%APPDATA%\Vestigium\vestigium.sqlite` managing workflows, site profiles, item caches, and run histories.
+- **Encrypted Session Continuity**: Session cookies are encrypted via Windows DPAPI (`safeStorage`) into `session-cookies.enc` on clean exit and restored on launch, ensuring logged-in sites remain active without risking stale crash restores.
+- **Multi-Source Filter Engine**: Filter lists are parsed into memory buffers directly from EasyList and uBlock Origin rule sets, checking each request before network dispatch.
+
+---
+
+## 🎨 Icon &amp; Design Philosophy
+
+<p align="center">
+  <img src="build/icon.png" alt="Vestigium App Icon" width="100" height="100" />
+</p>
+
+> *"A dark forest square anchored by a clean, resilient sage-green 'V' glyph — representing the lasting trace and dependable trail left behind by purposeful navigation."*
+
+The visual identity of Vestigium is engineered around clarity, balance, and precision:
+- **Obsidian Forest (`#111916`)**: An ultra-dark, grounding slate background that provides seamless contrast in both Windows taskbar and system tray contexts.
+- **Muted Sage Accent (`#A7CF8A`)**: A calm, organic green representing successful traces, verified paths, and natural adaptation.
+- **Zero-Dependency Vector Generation**: The icon is drawn purely in code using a mathematical 32-unit grid and minimal PNG chunk generation (`src/main/tray-icon.ts`), guaranteeing razor-sharp rasterization across all display scales (16px to 256px).
+
+---
+
+## 📜 License &amp; Credits
+
+Vestigium is designed and maintained by **Nihil** as part of the **Gloria Repoz** suite.
+
+- **Architecture Documentation**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full subsystem specifications and design decisions.
+- **Milestone Verifications**: Complete testing logs and artifacts for milestones 0 through 9 are cataloged under [docs/](docs/).
+- **Copyright**: &copy; 2026 Nihil. All rights reserved.
