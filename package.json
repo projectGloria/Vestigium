@@ -1,0 +1,59 @@
+{
+  "name": "vestigium",
+  "version": "0.1.0",
+  "description": "Vestigium desktop workflow browser",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit",
+    "demo": "tsx tests/demo-site/start.ts",
+    "native:rebuild": "electron-rebuild -f -w better-sqlite3",
+    "postinstall": "npm run native:rebuild",
+    "test": "npm run test:unit && npm run test:demo && npm run test:e2e",
+    "test:unit": "node scripts/test-unit.mjs",
+    "test:demo": "playwright test --config playwright.config.ts",
+    "test:http": "playwright test tests/unit --config playwright.config.ts",
+    "test:e2e": "npm run build && playwright test --config playwright.electron.config.ts",
+    "cli": "electron out/main/app.cjs --",
+    "dist": "npm run icon && npm run build && electron-builder --win nsis",
+    "icon": "tsx scripts/make-icon.ts",
+    "filter-lists": "tsx scripts/update-filter-lists.ts",
+    "test:package": "playwright test --config playwright.package.config.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "@ghostery/adblocker": "2.20.1",
+    "better-sqlite3": "13.0.3",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "4.2.1",
+    "@playwright/test": "1.64.1",
+    "@types/better-sqlite3": "9.6.0",
+    "@types/express": "5.0.6",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/yauzl": "3.4.0",
+    "@types/yazl": "3.3.1",
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3",
+    "electron-vite": "6.0.0",
+    "esbuild": "0.28.2",
+    "express": "5.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "yauzl": "3.4.0",
+    "yazl": "3.3.1"
+  },
+  "private": true,
+  "engines": {
+    "node": "26.8.1"
+  },
+  "main": "out/main/app.cjs",
+  "packageManager": "npm@11.19.0"
+}

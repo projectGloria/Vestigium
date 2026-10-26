@@ -1,0 +1,3 @@
+! Test filter list for the demo site (VESTIGIUM_FILTER_LISTS). Both demo origins are 127.0.0.1, so the demo
+! "ad network" is told apart by path, not by host.
+/demo-ads/*

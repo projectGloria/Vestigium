@@ -1,0 +1,46 @@
+# Windows installer (plan milestone 9): `npm run dist` → release/Vestigium Setup <version>.exe
+appId: app.vestigium.desktop
+productName: Vestigium
+copyright: Copyright © 2026 Nihil
+directories:
+  output: release
+  buildResources: build
+# Only the built app; the renderer, preloads and main are bundles. Runtime packages come from "dependencies".
+files:
+  - out/**
+  - package.json
+  # better-sqlite3 ships sources and other platforms' binaries; only the Windows x64 prebuild is loaded here.
+  - "!**/node_modules/better-sqlite3/{deps,src,build}/**"
+  - "!**/node_modules/better-sqlite3/prebuilds/{darwin,linux,linuxmusl,win32-arm64}*"
+# The SQLite addon is a native file and must live outside the asar archive to be loaded.
+asar: true
+asarUnpack:
+  - "**/*.node"
+# Use the Electron already installed for development (same version, no download), and keep better-sqlite3's
+# Node-API prebuild, which already works under Electron (a rebuild would need a compiler toolchain).
+electronDist: node_modules/electron/dist
+electronVersion: 45.0.0
+npmRebuild: false
+# The filter lists the ad blocker starts from (resourcesilter-lists), refreshed weekly into the profile.
+extraResources:
+  - from: resources/filter-lists
+    to: filter-lists
+# The command-line shim, next to Vestigium.exe.
+extraFiles:
+  - from: build/vestigium.cmd
+    to: vestigium.cmd
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.png
+  executableName: Vestigium
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Vestigium
+  # Uninstalling keeps the user's profile (workflows, logins, history) unless they delete it themselves.
+  deleteAppDataOnUninstall: false

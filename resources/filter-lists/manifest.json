@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "fetchedAt": "2026-10-23T21:49:43.251Z",
+  "lists": [
+    "easylist-easylist",
+    "easylist-easyprivacy",
+    "peter-lowe-serverlist",
+    "ublock-origin-badware",
+    "ublock-origin-filters",
+    "ublock-origin-filters-2020",
+    "ublock-origin-filters-2021",
+    "ublock-origin-filters-2022",
+    "ublock-origin-filters-2023",
+    "ublock-origin-filters-2024",
+    "ublock-origin-privacy",
+    "ublock-origin-quick-fixes",
+    "ublock-origin-resource-abuse",
+    "ublock-origin-unbreak"
+  ]
+}

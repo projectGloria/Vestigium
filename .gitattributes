@@ -1,0 +1,7 @@
+# Archive fixtures are binary; line-ending conversion must never touch them.
+*.zip binary
+*.7z binary
+*.rar binary
+*.png binary
+*.ico binary
+*.cmd text eol=crlf
