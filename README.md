@@ -274,6 +274,9 @@ npm run test:demo      # Playwright browser integration suite
 npm run test:http      # HTTP Range and network streaming tests
 npm run test:e2e       # Electron application e2e tests
 npm run test:package   # Post-dist NSIS installer verification
+
+# One unit-test file (name contains "store"), optionally one test; node:test flags need --flag=value
+npm run test:unit -- store --test-name-pattern="migrations"
 ```
 
 ---

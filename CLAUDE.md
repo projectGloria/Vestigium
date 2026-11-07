@@ -4,13 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Vestigium is an Electron desktop app that learns a browse-and-download workflow from a single demonstration and then runs it across every item on every page. The full spec lives outside the repo at `C:\Users\Nihil\Desktop\Vestigium Plan.md` (milestones 0–9, schemas, edge cases, definitions of done). **Milestones 0–9 are done (the whole plan)** (demo site; shell, persistent profile, SQLite; recorder, workflow JSON, multi-locator replay, workflow UI; smart waits, self-healing with review, trusted clicks, run/step/dry modes, pauses, pacing; pagination detection and `loop_pages`; item pattern inference, automatic generalization of a one-item recording, `loop_items`, item highlighting with exclusions; download interception, the resumable persistent download queue, verification, dedupe and history; item details captured from pages, filename templates, `_info.txt` sidecars, unpacking ZIP (ZipCrypto/AES) built in and 7z/RAR through 7-Zip; "Needs you" pauses for captchas, logins and countdowns that continue by themselves, site profiles with Start and health, re-teaching one step, failure screenshots, persistent run history, safety confirmations and an allowlist, clipboard link, tray; the `vestigium run` command line and the NSIS installer). The user asked to keep going through the milestones without stopping until they say otherwise. Each milestone has its evidence in `docs/MILESTONE-N-VERIFICATION.md`. 
+Vestigium is an Electron desktop app that learns a browse-and-download workflow from a single demonstration and then runs it across every item on every page. The full spec lives outside the repo at `C:\Users\Nihil\Desktop\Vestigium Plan.md` (milestones 0–9, schemas, edge cases, definitions of done). **Milestones 0–9 are done (the whole plan)** (demo site; shell, persistent profile, SQLite; recorder, workflow JSON, multi-locator replay, workflow UI; smart waits, self-healing with review, trusted clicks, run/step/dry modes, pauses, pacing; pagination detection and `loop_pages`; item pattern inference, automatic generalization of a one-item recording, `loop_items`, item highlighting with exclusions; download interception, the resumable persistent download queue, verification, dedupe and history; item details captured from pages, filename templates, `_info.txt` sidecars, unpacking ZIP (ZipCrypto/AES) built in and 7z/RAR through 7-Zip; "Needs you" pauses for captchas, logins and countdowns that continue by themselves, site profiles with Start and health, re-teaching one step, failure screenshots, persistent run history, safety confirmations and an allowlist, clipboard link, tray; the `vestigium run` command line and the NSIS installer). Each milestone has its evidence in `docs/MILESTONE-N-VERIFICATION.md`. The user's instruction to keep going through milestones 0–9 without stopping was for that run and ended with it.
 
-Rules from the plan that govern every change:
-- Do one milestone at a time. Stop after each one, summarize it, and wait for the user before starting the next.
-- Don't write placeholder, mock or TODO implementations of core logic. Name anything deferred explicitly.
+Rules for milestone work (applies if the plan gains new milestones):
+- Do one milestone at a time. Stop after each one, summarize it, and wait for the user before starting the next, unless the user has said in this session to keep going.
 - A milestone isn't done until its tests pass and its acceptance check has been run in the real app. Record the evidence in `docs/MILESTONE-N-VERIFICATION.md` with the actual command output.
 - Update `docs/ARCHITECTURE.md` and `README.md` every milestone.
+
+Rules for every change, milestone or not (bug fixes, small features):
+- Don't write placeholder, mock or TODO implementations of core logic. Name anything deferred explicitly.
+- Run the relevant tests, and check behavior changes in the real app. Update `docs/ARCHITECTURE.md` or `README.md` when the change affects what they describe. Don't create a new `MILESTONE-N-VERIFICATION.md` for work outside a milestone.
 - Non-goals: captcha solving, bot-protection or paywall bypass, proxy rotation, cloud sync, telemetry. For captchas, countdowns and logins, pause for the human.
 - The user's old Python downloader is reference material only. Never port its site-specific scraping.
 
@@ -26,13 +29,14 @@ npm start            # preview the production build
 npm run demo         # demo site on 127.0.0.1:4173 (+ second origin :4174)
 npm run typecheck    # tsc --noEmit
 npm test             # test:unit + test:demo + test:e2e (full suite)
-npm run test:unit    # tests/app-unit via Electron-as-Node (see below)
-npm run test:demo    # Playwright, all tests/**/*.spec.ts except tests/electron
+npm run test:unit    # tests/app-unit via Electron-as-Node (see below); filters: -- store --test-name-pattern="x"
+npm run test:demo    # Playwright, all tests/**/*.spec.ts except tests/electron and tests/package
 npm run test:http    # only tests/unit (HTTP/download fixture tests)
 npm run test:e2e     # builds, then Playwright Electron tests (workers: 1)
 npm run cli -- run --profile <site> …   # the command line (development build)
 npm run dist         # icon + build + electron-builder → release/Vestigium Setup <version>.exe
 npm run test:package # after dist: launches the app extracted from the installer (needs 7-Zip)
+npm run filter-lists # downloads all live lists, then replaces the tracked resources/filter-lists/ (a failed fetch changes nothing); run only on purpose, review the diff, commit
 ```
 
 Running a single test:
@@ -40,6 +44,8 @@ Running a single test:
 npx playwright test tests/e2e/site.spec.ts -g "test name" --config playwright.config.ts
 npm run build && npx playwright test --config playwright.electron.config.ts -g "test name"
 ```
+
+One app-unit file or test: `npm run test:unit -- <part of the file name> --test-name-pattern="test name"`. Arguments without a leading `-` select files by name; the rest go to `node:test` and must use `--flag=value`. The runner always rebundles, so it never runs a stale bundle.
 
 Native module gotcha: better-sqlite3 is compiled against the **Electron** ABI. Never run `npm rebuild better-sqlite3`, because it swaps in a host-Node binary. Use `npm run native:rebuild` instead. For the same reason, `scripts/test-unit.mjs` finds every `tests/app-unit/*.test.ts`, bundles them with esbuild into `.unit-build/` and runs them with `node:test` under `ELECTRON_RUN_AS_NODE=1`.
 
