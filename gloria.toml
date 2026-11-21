@@ -1,0 +1,10 @@
+id = "Vestigium"
+name = "Vestigium"
+version = "0.1.0"
+main_exe = "Vestigium.exe"
+icon = "build/icon.png"
+accent = "#38bdf8"
+description = "Workflow automation browser by demonstration"
+needs_webview2 = false
+data_folders = ["%APPDATA%\\Vestigium"]
+legacy_names = ["Vestigium"]

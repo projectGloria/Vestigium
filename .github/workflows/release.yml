@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  setup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # postinstall rebuilds better-sqlite3 for Electron's ABI
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the app
+        run: npm run build
+
+      # Unpacked Windows app folder only (no installer); build/icon.png is already tracked.
+      - name: Package the app folder
+        run: npx electron-builder --win dir --x64 --publish never
+
+      - name: Collect runtime files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force app-dist | Out-Null
+          Copy-Item -Path 'release/win-unpacked/*' -Destination app-dist -Recurse -Force
+          if (-not (Test-Path app-dist/Vestigium.exe)) { throw 'Vestigium.exe is missing from app-dist' }
+
+      - name: Make sure the release exists
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release view $env:TAG | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $env:TAG --generate-notes --title $env:TAG
+            if ($LASTEXITCODE -ne 0) { throw "could not create release $env:TAG" }
+          }
+
+      - uses: projectGloria/GloriaSetup@v0.1.0
+        with:
+          app-dir: app-dist
+          manifest: gloria.toml
+          certificate: ${{ secrets.WINDOWS_PFX_BASE64 }}
+          certificate-password: ${{ secrets.WINDOWS_PFX_PASSWORD }}
