@@ -1,6 +1,6 @@
 {
   "name": "vestigium",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vestigium desktop workflow browser",
   "scripts": {
     "dev": "electron-vite dev",
